@@ -2,6 +2,7 @@
 php = "8.2"
 
 [phases.setup]
+nixPkgs = ["php82", "php82Extensions.pdo", "php82Extensions.pdo_pgsql", "php82Extensions.pgsql"]
 cmds = ["composer install --no-dev --optimize-autoloader"]
 
 [start]
