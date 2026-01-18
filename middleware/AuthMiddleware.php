@@ -15,7 +15,7 @@ class AuthMiddleware
     
     public static function init()
     {
-        self::$secretKey = $_ENV['JWT_SECRET'] ?? 'default_secret_key';
+        self::$secretKey = $_ENV['JWT_SECRET'] ?? getenv('JWT_SECRET') ?: 'default_secret_key';
     }
     
     /**
