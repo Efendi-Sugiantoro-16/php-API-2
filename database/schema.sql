@@ -50,3 +50,6 @@ CREATE TRIGGER update_users_updated_at
     BEFORE UPDATE ON users
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- Migration: Add category to schedules (2025-02-02)
+ALTER TABLE schedules ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'Kuliah';
