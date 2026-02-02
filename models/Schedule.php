@@ -18,7 +18,8 @@ class Schedule extends Model
         'subject',
         'start_time',
         'end_time',
-        'is_completed'
+        'is_completed',
+        'category'
     ];
     
     protected $casts = [

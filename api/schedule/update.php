@@ -57,6 +57,7 @@ try {
         'subject' => $data['subject'] ?? $schedule->subject,
         'start_time' => $data['start_time'] ?? $schedule->start_time,
         'end_time' => $data['end_time'] ?? $schedule->end_time,
+        'category' => $data['category'] ?? $schedule->category,
         'is_completed' => $data['is_completed'] ?? $schedule->is_completed
     ]);
     

@@ -63,6 +63,7 @@ try {
         'subject' => $data['subject'],
         'start_time' => $data['start_time'],
         'end_time' => $data['end_time'],
+        'category' => $data['category'] ?? 'Kuliah',
         'is_completed' => false
     ]);
     
