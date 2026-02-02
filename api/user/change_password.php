@@ -1,7 +1,7 @@
 <?php
 /**
- * Update User Profile API Endpoint
- * POST /api/user/update_profile.php
+ * Change Password API Endpoint
+ * POST /api/user/change_password.php
  */
 
 require_once __DIR__ . '/../../config/cors.php';
@@ -27,16 +27,12 @@ $user = User::find($userId);
 
 if (!$user) {
     http_response_code(404);
-    echo json_encode([
-        'success' => false,
-        'message' => 'User not found'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'User not found']);
     exit();
 }
 
-// Get form data (supports both JSON and form-data)
+// Get form data
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-
 if (strpos($contentType, 'application/json') !== false) {
     $data = json_decode(file_get_contents('php://input'), true);
 } else {
@@ -46,25 +42,14 @@ if (strpos($contentType, 'application/json') !== false) {
 // Validation
 $errors = [];
 
-// Trim data
-if (isset($data['name'])) $data['name'] = trim($data['name']);
-if (isset($data['username'])) $data['username'] = trim($data['username']);
-if (isset($data['npm'])) $data['npm'] = trim($data['npm']);
-
-// Validate username
-if (empty($data['username'])) {
-    $errors['username'] = ['Username is required'];
+if (empty($data['current_password'])) {
+    $errors['current_password'] = ['Current password is required'];
 }
 
-// Check if username is taken by another user
-if (!empty($data['username']) && $data['username'] !== $user->username) {
-    $existingUser = User::where('username', $data['username'])
-        ->where('id', '!=', $userId)
-        ->first();
-    
-    if ($existingUser) {
-        $errors['username'] = ['Username already taken'];
-    }
+if (empty($data['new_password'])) {
+    $errors['new_password'] = ['New password is required'];
+} elseif (strlen($data['new_password']) < 6) {
+    $errors['new_password'] = ['Password must be at least 6 characters'];
 }
 
 if (!empty($errors)) {
@@ -77,23 +62,33 @@ if (!empty($errors)) {
     exit();
 }
 
-// Update user profile
-try {
-    $user->update([
-        'name' => $data['name'] ?? $user->name,
-        'username' => $data['username'] ?? $user->username,
-        'npm' => $data['npm'] ?? $user->npm
+// Verify current password
+// Note: We need to make the password visible temporarily since it's hidden in the model
+$user->makeVisible(['password']);
+
+if (!password_verify($data['current_password'], $user->password)) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Incorrect current password'
     ]);
+    exit();
+}
+
+// Update password
+try {
+    $user->password = password_hash($data['new_password'], PASSWORD_BCRYPT);
+    $user->save();
     
     http_response_code(200);
     echo json_encode([
         'success' => true,
-        'message' => 'Profile updated successfully'
+        'message' => 'Password changed successfully'
     ]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Failed to update profile'
+        'message' => 'Failed to change password'
     ]);
 }
